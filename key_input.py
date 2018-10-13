@@ -1,16 +1,35 @@
 import time
 import pyautogui
+import pickle
 
-def hold_Key (hold_time, key_string):
-    start = time.time()
-    while time.time() - start < hold_time:
-        pyautogui.keyDown(key_string)
-    pyautogui.keyUp(key_string)
+buffer = 1
 
-def hold_Two_Keys (hold_time, key_string1, key_string2):
-    start = time.time()
-    while time.time() - start < hold_time:
-        pyautogui.keyDown(key_string1)
-        pyautogui.keyDown(key_string2)
-    pyautogui.keyUp(key_string1)
-    pyautogui.keyUp(key_string2)
+recentTime = time.time() 
+# Most recent time of last command 
+
+string lastDirection;
+# 'left', 'right', 'jump', 'pause', 'end'
+
+latestCommand = unpickler.load("pickler.txt")
+while latestCommand != 'end':
+    if latestCommand == 'right':
+        pyautogui.keyDown('right')
+        recentTime = time.time()
+        lastDirection = 'right'
+
+    else if latestCommand == 'left':
+        pyautogui.keyDown('left')
+        recentTime = time.time()
+        lastDirection = 'left'
+
+    else if latestCommand == 'jump':
+        pyautogui.keyDown('alt')
+        pyautogui.keyDown(lastDirection)
+
+    else if latestCommand == 'pause':
+        pyautogui.keyDown('esc')
+
+    else if time.time() - latestTime > buffer:
+        pyautogui.keyUp(lastDirection)
+
+    latestCommand = unpickler.load("pickler.txt")
