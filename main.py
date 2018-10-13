@@ -13,7 +13,8 @@ import os
 
 import pygame
 import pygame.midi
-import melody.py
+import melody
+import InputMIDI
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -93,8 +94,8 @@ def usage():
     print ("--input [device_id] : Midi message logger")
     print ("--list : list available midi devices")
 
-def main(mode='output', device_id=None):
-    """Run a Midi example
+def main():
+	"""Run a Midi example
 
     Arguments:
     mode - 'input' run a midi event logger input example
@@ -103,27 +104,33 @@ def main(mode='output', device_id=None):
     device_id - midi device number; if None then use the default midi input or
                 output device for the system
 
-    """
-	#melody1_1
+	"""
+	inputs = InputMIDI()
 	melodyPosition = 0
 	goingRight = True
-	#while true
-	#	currentNote = GETDATAFUNCTION
-	#	if currentNote == melody1_1[melodyPosition]
-	#		MOVE FORWARD
-	#		melodyPositon += 1
-	#	elif currentNote == JUMP FIRST NOTE
-	#		if currentNote == JUMP SECOND NOTE
+	while True:
+		currentNote = inputs.getInput()
+		if currentNote == melody1_1[melodyPosition]:
+	#		if goingRight:
+	#			MOVE FORWARD
+	#		else:
+	#			MOVE BACKWARD
+	#		melodyPosition += 1
+	#		if melodyPosition == 238:
+	#			melodyPosition = 0
+	#	elif currentNote == jump[0]:
+	#		currentNote = inputs.getInput()
+	#		if currentNote == jump[1]:
 	#			JUMP
-	#	elif currentNote == TURN AROUND
-	#		goingRight = !goingRight
-	#	elif WHATEVER ELSE WE WANT TO DO
-	#		DO
-	#				 
-    if mode == 'input':
-        input_main(device_id)
-    elif mode == 'list':
-        print_device_info()
-    else:
-        raise ValueError("Unknown mode option '%s'" % mode)
-               
+	#	elif currentNote == reverse[0]:
+	#		currentNote = inputs.getInput()
+	#		if currentNote == reverse[1]:
+	#			goingRight = !goingRight
+	#	elif currentNote == pause[0]:
+	#		currentNote = inputs.getInput()
+	#		if currentNote == pause[1]:
+	#			currentNote = inputs.getInput()
+	#			if currentNote == pause[2]:
+	#				currentNote = inputs.getInput()
+	#				if currentNote == pause[3]:
+	#					PAUSE
