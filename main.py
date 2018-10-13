@@ -13,8 +13,9 @@ import os
 
 import pygame
 import pygame.midi
-import melody
+import sequences
 import InputMIDI
+
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -94,43 +95,34 @@ def usage():
     print ("--input [device_id] : Midi message logger")
     print ("--list : list available midi devices")
 
-def main():
-	"""Run a Midi example
 
-    Arguments:
-    mode - 'input' run a midi event logger input example
-           'list' list available midi devices
-           (default 'output')
-    device_id - midi device number; if None then use the default midi input or
-                output device for the system
 
-	"""
-	inputs = InputMIDI()
-	melodyPosition = 0
-	goingRight = True
-	while True:
-		currentNote = inputs.getInput()
-		if currentNote == melody1_1[melodyPosition]:
-	#		if goingRight:
-	#			MOVE FORWARD
-	#		else:
-	#			MOVE BACKWARD
-	#		melodyPosition += 1
-	#		if melodyPosition == 238:
-	#			melodyPosition = 0
-	#	elif currentNote == jump[0]:
-	#		currentNote = inputs.getInput()
-	#		if currentNote == jump[1]:
-	#			JUMP
-	#	elif currentNote == reverse[0]:
-	#		currentNote = inputs.getInput()
-	#		if currentNote == reverse[1]:
-	#			goingRight = !goingRight
-	#	elif currentNote == pause[0]:
-	#		currentNote = inputs.getInput()
-	#		if currentNote == pause[1]:
-	#			currentNote = inputs.getInput()
-	#			if currentNote == pause[2]:
-	#				currentNote = inputs.getInput()
-	#				if currentNote == pause[3]:
-	#					PAUSE
+inputs = InputMIDI.InputMIDI()
+melodyPosition = 0
+goingRight = True
+while True:
+	currentNote = inputs.getInput()
+	if currentNote == melody1_1[melodyPosition]:
+#		if goingRight:
+#			MOVE FORWARD
+#		else:
+#			MOVE BACKWARD
+#		melodyPosition += 1
+#		if melodyPosition == 238:
+#			melodyPosition = 0
+#	elif currentNote == jump[0]:
+#		currentNote = inputs.getInput()
+#		if currentNote == jump[1]:
+#			JUMP
+#	elif currentNote == reverse[0]:
+#		currentNote = inputs.getInput()
+#		if currentNote == reverse[1]:
+#			goingRight = !goingRight
+#	elif currentNote == pause[0]:
+#		currentNote = inputs.getInput()
+#		if currentNote == pause[1]:
+#			currentNote = inputs.getInput()
+#			if currentNote == pause[2]:
+#				currentNote = inputs.getInput()
+#				if currentNote == pause[3]:
+#					PAUSE
