@@ -16,6 +16,7 @@ import pygame.midi
 import sequences
 import InputMIDI
 import thread
+import pickle
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -96,7 +97,8 @@ def usage():
     print ("--list : list available midi devices")
 
 
-
+instructionFile = open("pickler.txt", w)
+pickler = pickle.Pickler(instructionFile)
 inputs = InputMIDI.InputMIDI()
 melodyPosition = 0
 goingRight = True
@@ -104,25 +106,35 @@ while True:
 	currentNote = inputs.getInput()
 	if currentNote == melody1_1[melodyPosition]:
 		if goingRight:
-			thread.start_new_thread(hold_Key, (2,"right"))
+			pickler.dump("right")
 		else:
-			thread.start_new_thread(hold_Key, (2,"left"))
+			pickler.dump("left")
 		melodyPosition += 1
 		if melodyPosition == 238:
 			melodyPosition = 0
 	elif currentNote == jump[0]:
 		currentNote = inputs.getInput()
+		while currentNote == 0:
+			currentNote = inputs.getInput()
 		if currentNote == jump[1]:
-			thread.start_new_thread(hold_Two_Keys, (2,"right", "up"))
+			pickler.dump("up")
 	elif currentNote == reverse[0]:
 		currentNote = inputs.getInput()
+		while currentNote == 0:
+			currentNote = inputs.getInput()
 		if currentNote == reverse[1]:
 			goingRight = not goingRight
 	elif currentNote == pause[0]:
 		currentNote = inputs.getInput()
+		while currentNote == 0:
+			currentNote = inputs.getInput()
 		if currentNote == pause[1]:
 			currentNote = inputs.getInput()
+			while currentNote == 0:
+				currentNote = inputs.getInput()
 			if currentNote == pause[2]:
 				currentNote = inputs.getInput()
+				while currentNote == 0:
+					currentNote = inputs.getInput()
 				if currentNote == pause[3]:
-					thread.start_new_thread(hold_Key, (2,"esc"))
+					pickler.dump("esc") # why be holdin down esc
