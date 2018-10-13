@@ -15,7 +15,7 @@ import pygame
 import pygame.midi
 import sequences
 import InputMIDI
-
+import thread
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -103,26 +103,26 @@ goingRight = True
 while True:
 	currentNote = inputs.getInput()
 	if currentNote == melody1_1[melodyPosition]:
-#		if goingRight:
-#			MOVE FORWARD
-#		else:
-#			MOVE BACKWARD
-#		melodyPosition += 1
-#		if melodyPosition == 238:
-#			melodyPosition = 0
-#	elif currentNote == jump[0]:
-#		currentNote = inputs.getInput()
-#		if currentNote == jump[1]:
-#			JUMP
-#	elif currentNote == reverse[0]:
-#		currentNote = inputs.getInput()
-#		if currentNote == reverse[1]:
-#			goingRight = !goingRight
-#	elif currentNote == pause[0]:
-#		currentNote = inputs.getInput()
-#		if currentNote == pause[1]:
-#			currentNote = inputs.getInput()
-#			if currentNote == pause[2]:
-#				currentNote = inputs.getInput()
-#				if currentNote == pause[3]:
-#					PAUSE
+		if goingRight:
+			thread.start_new_thread(hold_Key, (2,"right"))
+		else:
+			thread.start_new_thread(hold_Key, (2,"left"))
+		melodyPosition += 1
+		if melodyPosition == 238:
+			melodyPosition = 0
+	elif currentNote == jump[0]:
+		currentNote = inputs.getInput()
+		if currentNote == jump[1]:
+			thread.start_new_thread(hold_Two_Keys, (2,"right", "up"))
+	elif currentNote == reverse[0]:
+		currentNote = inputs.getInput()
+		if currentNote == reverse[1]:
+			goingRight = not goingRight
+	elif currentNote == pause[0]:
+		currentNote = inputs.getInput()
+		if currentNote == pause[1]:
+			currentNote = inputs.getInput()
+			if currentNote == pause[2]:
+				currentNote = inputs.getInput()
+				if currentNote == pause[3]:
+					thread.start_new_thread(hold_Key, (2,"esc"))
