@@ -13,6 +13,7 @@ import os
 
 import pygame
 import pygame.midi
+import melody.py
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -103,26 +104,26 @@ def main(mode='output', device_id=None):
                 output device for the system
 
     """
-
+	#melody1_1
+	melodyPosition = 0
+	goingRight = True
+	#while true
+	#	currentNote = GETDATAFUNCTION
+	#	if currentNote == melody1_1[melodyPosition]
+	#		MOVE FORWARD
+	#		melodyPositon += 1
+	#	elif currentNote == JUMP FIRST NOTE
+	#		if currentNote == JUMP SECOND NOTE
+	#			JUMP
+	#	elif currentNote == TURN AROUND
+	#		goingRight = !goingRight
+	#	elif WHATEVER ELSE WE WANT TO DO
+	#		DO
+	#				 
     if mode == 'input':
         input_main(device_id)
     elif mode == 'list':
         print_device_info()
     else:
         raise ValueError("Unknown mode option '%s'" % mode)
-                
-if __name__ == '__main__':
-
-    try:
-        device_id = int( sys.argv[-1] )
-    except:
-        device_id = None
-
-    if "--input" in sys.argv or "-i" in sys.argv:
-
-        input_main(device_id)
-
-    elif "--list" in sys.argv or "-l" in sys.argv:
-        print_device_info()
-    else:
-        usage()
+               
