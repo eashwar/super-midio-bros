@@ -27,7 +27,6 @@ class InputMIDI:
 
 
     def __init__(self):
-        print("Made it to beginning of constructor\n")
         pygame.init()
         pygame.fastevent.init()
         self.event_get = pygame.fastevent.get
@@ -38,11 +37,8 @@ class InputMIDI:
 
         self.input_stream = pygame.midi.Input( input_id )
 
-        print("Made it to end of constructor\n")
-
 
     def getInput(self):
-        print("Made it to beginning of getInput\n")
         while self.input_stream.poll():
             midi_event = self.input_stream.read(1)
             # convert it into a pygame event:

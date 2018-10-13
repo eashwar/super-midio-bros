@@ -1,144 +1,114 @@
 #!/usr/bin/env python
 
-"""Contains an example of midi input, and a separate example of midi output.
-
-By default it runs the output example.
-python midi.py --output
-python midi.py --input
-
-"""
-
 import sys
 import os
-
+import time
+import pyautogui
 import pygame
 import pygame.midi
 import sequences
 import InputMIDI
-import thread
-import pickle
-import os
 from pygame.locals import *
+from queue import Queue
+import threading
 
 try:  # Ensure set available for output example
     set
 except NameError:
     from sets import Set as set
 
+def emu_controller():
+    buffer = 3
 
-def print_device_info():
-    pygame.midi.init()
-    _print_device_info()
-    pygame.midi.quit()
+    recentTime = 0.0
+    # Most recent time of last command 
 
-def _print_device_info():
-    for i in range( pygame.midi.get_count() ):
-        r = pygame.midi.get_device_info(i)
-        (interf, name, input, output, opened) = r
+    lastDirection = ""
+    # 'left', 'right', 'jump', 'pause', 'end'
 
-        in_out = ""
-        if input:
-            in_out = "(input)"
-        if output:
-            in_out = "(output)"
+    latestCommand = q.get()
+    q.task_done()
+    while True:
+        if latestCommand == 'right':
+            pyautogui.press('right')
+            recentTime = time.time()
+            lastDirection = 'right'
 
-        print ("%2i: interface :%s:, name :%s:, opened :%s:  %s" %
-               (i, interf, name, opened, in_out))
-        
+        elif latestCommand == 'left':
+            pyautogui.press('left')
+            recentTime = time.time()
+            lastDirection = 'left'
 
+        elif latestCommand == 'jump':
+            pyautogui.press(lastDirection)
+            pyautogui.press('.')
 
+        elif latestCommand == 'pause':
+            pyautogui.press('esc')
 
-def input_main(device_id = None):
-    pygame.init()
-    pygame.fastevent.init()
-    event_get = pygame.fastevent.get
-    event_post = pygame.fastevent.post
+        elif latestCommand == 'end':
+            break
+            
+        if not q.empty():            
+            latestCommand = q.get()
+            q.task_done()
+        else:
+            latestCommand = 'wait'
+    
+    print("exited queue")
 
-    pygame.midi.init()
-
-    _print_device_info()
-
-
-    if device_id is None:
-        input_id = pygame.midi.get_default_input_id()
-    else:
-        input_id = device_id
-
-    print ("using input_id :%s:" % input_id)
-    i = pygame.midi.Input( input_id )
-
-    pygame.display.set_mode((1,1))
-
-
-
-    going = True
-    while going:
-        events = event_get()
-        for e in events:
-            if e.type in [QUIT]:
-                going = False
-            if e.type in [KEYDOWN]:
-                going = False
-            if e.type in [pygame.midi.MIDIIN]:
-                print (e)
-
-        if i.poll():
-            midi_events = i.read(10)
-            # convert them into pygame events.
-            midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
-
-            for m_e in midi_evs:
-                event_post( m_e )
-
-    del i
-    pygame.midi.quit()
-
-def usage():
-    print ("--input [device_id] : Midi message logger")
-    print ("--list : list available midi devices")
-
-
-os.system("python p_input.py")
-instructionFile = open("pickler.txt", w)
-pickler = pickle.Pickler(instructionFile)
 inputs = InputMIDI.InputMIDI()
 melodyPosition = 0
 goingRight = True
+
+q = Queue()
+t = threading.Thread(target=emu_controller)
+t.daemon = True
+t.start()
+
 while True:
-	currentNote = inputs.getInput()
-	if currentNote == melody1_1[melodyPosition]:
-		if goingRight:
-			pickler.dump("right")
-		else:
-			pickler.dump("left")
-		melodyPosition += 1
-		if melodyPosition == 238:
-			melodyPosition = 0
-	elif currentNote == jump[0]:
-		currentNote = inputs.getInput()
-		while currentNote == 0:
-			currentNote = inputs.getInput()
-		if currentNote == jump[1]:
-			pickler.dump("up")
-	elif currentNote == reverse[0]:
-		currentNote = inputs.getInput()
-		while currentNote == 0:
-			currentNote = inputs.getInput()
-		if currentNote == reverse[1]:
-			goingRight = not goingRight
-	elif currentNote == pause[0]:
-		currentNote = inputs.getInput()
-		while currentNote == 0:
-			currentNote = inputs.getInput()
-		if currentNote == pause[1]:
-			currentNote = inputs.getInput()
-			while currentNote == 0:
-				currentNote = inputs.getInput()
-			if currentNote == pause[2]:
-				currentNote = inputs.getInput()
-				while currentNote == 0:
-					currentNote = inputs.getInput()
-				if currentNote == pause[3]:
-					pickler.dump("esc") # why be holdin down esc
-	elif currentNote == 36:
-		pickler.dump("end")
+    currentNote = inputs.getInput()
+    if currentNote == sequences.melody1_1[melodyPosition]:
+        if goingRight:
+            q.put("right")
+            print("right")
+        else:
+            q.put("left")
+            print("left")
+        melodyPosition += 1
+        if melodyPosition == 238:
+            melodyPosition = 0
+    elif currentNote == sequences.jump[0]:
+        currentNote = inputs.getInput()
+        while currentNote == 0:
+            currentNote = inputs.getInput()
+        if currentNote == sequences.jump[1]:
+            q.put("jump")
+            print("jump!")
+    elif currentNote == sequences.reverse[0]:
+        currentNote = inputs.getInput()
+        while currentNote == 0:
+            currentNote = inputs.getInput()
+        if currentNote == sequences.reverse[1]:
+            goingRight = not goingRight
+            print("reverse!")
+    elif currentNote == sequences.pause[0]:
+        currentNote = 0
+        pauseIndex = 1
+        while pauseIndex < len(sequences.pause):
+            while currentNote == 0:
+                currentNote = inputs.getInput()
+            if currentNote == sequences.pause[pauseIndex]:
+                pauseIndex = pauseIndex + 1
+                currentNote = 0
+            else:
+                break
+        if pauseIndex == len(sequences.pause):
+            q.put("pause")
+            print("pause!")
+    elif currentNote == 36:
+        q.put("end")
+        print("end")
+        break
+q.join()
+sys.exit()
