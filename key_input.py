@@ -1,5 +1,3 @@
-import time
-import pyautogui
 import pickle
 
 buffer = 1
