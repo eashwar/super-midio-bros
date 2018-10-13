@@ -17,6 +17,7 @@ import sequences
 import InputMIDI
 import thread
 import pickle
+import os
 from pygame.locals import *
 
 try:  # Ensure set available for output example
@@ -97,6 +98,7 @@ def usage():
     print ("--list : list available midi devices")
 
 
+os.system("python p_input.py")
 instructionFile = open("pickler.txt", w)
 pickler = pickle.Pickler(instructionFile)
 inputs = InputMIDI.InputMIDI()
@@ -138,3 +140,5 @@ while True:
 					currentNote = inputs.getInput()
 				if currentNote == pause[3]:
 					pickler.dump("esc") # why be holdin down esc
+	elif currentNote == 36:
+		pickler.dump("end")
