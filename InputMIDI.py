@@ -27,6 +27,7 @@ class InputMIDI:
 
 
     def __init__(self):
+        print("Made it to beginning of constructor\n")
         pygame.init()
         pygame.fastevent.init()
         self.event_get = pygame.fastevent.get
@@ -37,16 +38,19 @@ class InputMIDI:
 
         self.input_stream = pygame.midi.Input( input_id )
 
+        print("Made it to end of constructor\n")
+
 
     def getInput(self):
+        print("Made it to beginning of getInput\n")
         while self.input_stream.poll():
             midi_event = self.input_stream.read(1)
             # convert it into a pygame event:
             pygame_event = pygame.midi.midis2events(midi_event, self.input_stream.device_id)
           
             # return the integer value of the note that was pressed:
-            if pygame_event.data2 == 100:
-                return pygame_event.data1
+            if pygame_event[0].data2 == 100:
+                return pygame_event[0].data1
         
         # if there isn't any new MIDI information:
         return 0
