@@ -8,67 +8,73 @@ import pygame
 import pygame.midi
 import sequences
 import InputMIDI
-import pickle
-import os
 from pygame.locals import *
+from queue import Queue
+import threading
 
 try:  # Ensure set available for output example
     set
 except NameError:
     from sets import Set as set
 
-def emu_controller(input):
+def emu_controller():
     buffer = 3
 
-    recentTime = time.time() 
+    recentTime = 0.0
     # Most recent time of last command 
 
     lastDirection = ""
     # 'left', 'right', 'jump', 'pause', 'end'
 
-    latestCommand = input#unpickler.load("pickler.txt")
-    while latestCommand != 'end':
+    latestCommand = q.get()
+    q.task_done()
+    while True:
         if latestCommand == 'right':
-            pyautogui.keyDown('right')
+            pyautogui.press('right')
             recentTime = time.time()
             lastDirection = 'right'
 
         elif latestCommand == 'left':
-            pyautogui.keyDown('left')
+            pyautogui.press('left')
             recentTime = time.time()
             lastDirection = 'left'
 
         elif latestCommand == 'jump':
-            pyautogui.keyDown('.')
-            #pyautogui.keyDown('alt')
-            pyautogui.keyDown(lastDirection)
+            pyautogui.press(lastDirection)
+            pyautogui.press('.')
 
         elif latestCommand == 'pause':
-            pyautogui.keyDown('esc')
+            pyautogui.press('esc')
 
-        elif time.time() - latestTime > buffer:
-            pyautogui.keyUp(lastDirection)
+        elif latestCommand == 'end':
+            break
+            
+        if not q.empty():            
+            latestCommand = q.get()
+            q.task_done()
+        else:
+            latestCommand = 'wait'
+    
+    print("exited queue")
 
-        latestCommand = 'end'#unpickler.load("pickler.txt")
-
-# os.system("python p_input.py")
-# instructionFile = open("pickler.txt", w)
-# pickler = pickle.Pickler(instructionFile)
 inputs = InputMIDI.InputMIDI()
 melodyPosition = 0
 goingRight = True
+
+q = Queue()
+t = threading.Thread(target=emu_controller)
+t.daemon = True
+t.start()
 
 while True:
     currentNote = inputs.getInput()
     if currentNote == sequences.melody1_1[melodyPosition]:
         if goingRight:
-            emu_controller("right")
-            #pickler.dump("right")
-            print("heading right from correct melody")
+            q.put("right")
+            print("right")
         else:
-            emu_controller("left")
-            # pickler.dump("left")
-            print("heading left from correct melody")
+            q.put("left")
+            print("left")
         melodyPosition += 1
         if melodyPosition == 238:
             melodyPosition = 0
@@ -77,8 +83,7 @@ while True:
         while currentNote == 0:
             currentNote = inputs.getInput()
         if currentNote == sequences.jump[1]:
-            emu_controller("jump")
-            # pickler.dump("jump")
+            q.put("jump")
             print("jump!")
     elif currentNote == sequences.reverse[0]:
         currentNote = inputs.getInput()
@@ -99,10 +104,11 @@ while True:
             else:
                 break
         if pauseIndex == len(sequences.pause):
-            # pickler.dump("pause")
+            q.put("pause")
             print("pause!")
     elif currentNote == 36:
-        # pickler.dump("end")
+        q.put("end")
         print("end")
         break
+q.join()
 sys.exit()
