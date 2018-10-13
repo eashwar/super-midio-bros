@@ -55,8 +55,6 @@ def emu_controller():
         else:
             latestCommand = 'wait'
     
-    print("exited queue")
-
 inputs = InputMIDI.InputMIDI()
 melodyPosition = 0
 goingRight = True
