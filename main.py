@@ -11,6 +11,12 @@ import InputMIDI
 from pygame.locals import *
 from queue import Queue
 import threading
+commandKey = {
+        'right':'right',
+        'left':'left',
+        'jump':'alt',
+        'pause':'esc'
+    }
 
 try:  # Ensure set available for output example
     set
@@ -18,42 +24,65 @@ except NameError:
     from sets import Set as set
 
 def emu_controller():
-    buffer = 3
+    buffer = .5
 
     recentTime = 0.0
     # Most recent time of last command 
 
-    lastDirection = ""
+    lastDirection = 'right'
     # 'left', 'right', 'jump', 'pause', 'end'
 
+    keyPressed = False
     latestCommand = q.get()
     q.task_done()
+    lastTime = time.time()
     while True:
-        if latestCommand == 'right':
-            pyautogui.press('right')
-            recentTime = time.time()
-            lastDirection = 'right'
+        if keyPressed: 
+            pyautogui.keyDown(commandKey[latestNonWait])
+            print("Pressed " + latestNonWait + " key down!")
 
-        elif latestCommand == 'left':
-            pyautogui.press('left')
-            recentTime = time.time()
-            lastDirection = 'left'
-
-        elif latestCommand == 'jump':
-            pyautogui.press(lastDirection)
-            pyautogui.press('.')
-
-        elif latestCommand == 'pause':
-            pyautogui.press('esc')
-
-        elif latestCommand == 'end':
+        if latestCommand == 'end':
             break
-            
-        if not q.empty():            
-            latestCommand = q.get()
+        
+        if latestCommand != 'wait':
+            latestNonWait = latestCommand
+
+            if latestCommand == 'jump':
+                pyautogui.keyDown(commandKey[lastDirection])
+
+            pyautogui.keyDown(commandKey[latestCommand])
+            print("Pressed " + latestCommand + " key down!")
+
+            recentTime = time.time()
+            keyPressed = True
+
+            if latestCommand == 'right' or latestCommand == 'left':
+                lastDirection = latestCommand
+
+        if not q.empty():     
+            latestCommand = q.get() 
             q.task_done()
         else:
             latestCommand = 'wait'
+
+        # Latest command here is really your next command
+        if latestCommand != latestNonWait:
+            if latestCommand == 'wait':
+                if keyPressed:
+                    if time.time() - recentTime > buffer:
+                        keyPressed = False; 
+                        if latestNonWait == 'jump':
+                            pyautogui.keyUp(commandKey[lastDirection])
+                        pyautogui.keyUp(commandKey[latestNonWait])
+                        print("Lifted " + latestNonWait + " key up!")
+            else: 
+                keyPressed = False 
+                if latestNonWait == 'jump':
+                        pyautogui.keyUp(commandKey[lastDirection])
+                pyautogui.keyUp(commandKey[latestNonWait])
+                print("Lifted " + latestNonWait + " key up!")
+
+
     
 inputs = InputMIDI.InputMIDI()
 melodyPosition = 0
@@ -74,7 +103,7 @@ while True:
             q.put("left")
             print("left")
         melodyPosition += 1
-        if melodyPosition == 238:
+        if melodyPosition == len(sequences.melody1_1):
             melodyPosition = 0
     elif currentNote == sequences.jump[0]:
         currentNote = inputs.getInput()
