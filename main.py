@@ -92,6 +92,10 @@ t = threading.Thread(target=emu_controller)
 t.daemon = True
 t.start()
 
+xOrigin = 340
+yOrigin = 100
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (xOrigin, yOrigin)
+
 disp_width = 1261
 disp_height = 200
 
