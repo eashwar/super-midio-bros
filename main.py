@@ -25,7 +25,7 @@ except NameError:
     from sets import Set as set
 
 def emu_controller():
-    buffer = .5
+    buffer = .2
 
     recentTime = 0.0
     # Most recent time of last command 
@@ -34,6 +34,7 @@ def emu_controller():
     # 'left', 'right', 'jump', 'pause', 'end'
 
     keyPressed = False
+    jumpHappening = False
     latestCommand = q.get()
     q.task_done()
     lastTime = time.time()
@@ -47,8 +48,6 @@ def emu_controller():
         if latestCommand != 'wait':
             latestNonWait = latestCommand
 
-            if latestCommand == 'jump':
-                pyautogui.keyDown(commandKey[lastDirection])
 
             pyautogui.keyDown(commandKey[latestCommand])
 
@@ -70,20 +69,19 @@ def emu_controller():
                 if keyPressed:
                     if time.time() - recentTime > buffer:
                         keyPressed = False; 
-                        if latestNonWait == 'jump':
-                            pyautogui.keyUp(commandKey[lastDirection])
                         pyautogui.keyUp(commandKey[latestNonWait])
+                        pyautogui.keyUp(commandKey['left'])
+                        pyautogui.keyUp(commandKey['right'])
             else: 
                 keyPressed = False 
                 if latestNonWait == 'jump':
-                        pyautogui.keyUp(commandKey[lastDirection])
+                    if latestCommand in ['left', 'right']:
+                        pyautogui.keyDown(commandKey[latestCommand])
                 pyautogui.keyUp(commandKey[latestNonWait])
 
 
     
 inputs = InputMIDI.InputMIDI()
-melodyPosition = 0
-goingRight = True
 
 q = Queue()
 t = threading.Thread(target=emu_controller)
@@ -144,6 +142,11 @@ def draw_sfx_rects():
 
 clock = pygame.time.Clock()
 
+melodyPosition = 0
+jumpPosition = 0
+betweenJumpCounter = 0
+goingRight = True
+
 while True:
     pygame.event.get()
 
@@ -154,7 +157,12 @@ while True:
     clock.tick(60)
 
     currentNote = inputs.getInput()
+
     if currentNote == sequences.melody1_1[melodyPosition]:
+        betweenJumpCounter += 1
+        if betweenJumpCounter > 2 and jumpPosition == 1:
+            jumpPosition = 0
+            betweenJumpCounter = 0
         if goingRight:
             q.put("right")
         else:
@@ -162,19 +170,27 @@ while True:
         melodyPosition += 1
         if melodyPosition == len(sequences.melody1_1):
             melodyPosition = 0
-    elif currentNote == sequences.jump[0]:
-        currentNote = inputs.getInput()
-        while currentNote == 0:
-            currentNote = inputs.getInput()
-        if currentNote == sequences.jump[1]:
+    elif currentNote == sequences.jump[jumpPosition]:
+        jumpPosition += 1
+        if jumpPosition == 2:
             q.put("jump")
+            jumpPosition = 0
+            betweenJumpCounter = 0
     elif currentNote == sequences.reverse[0]:
+        betweenJumpCounter += 1
+        if betweenJumpCounter > 2 and jumpPosition == 1:
+            jumpPosition = 0
+            betweenJumpCounter = 0
         currentNote = inputs.getInput()
         while currentNote == 0:
             currentNote = inputs.getInput()
         if currentNote == sequences.reverse[1]:
             goingRight = not goingRight
     elif currentNote == sequences.pause[0]:
+        betweenJumpCounter += 1
+        if betweenJumpCounter > 2 and jumpPosition == 1:
+            jumpPosition = 0
+            betweenJumpCounter = 0
         currentNote = 0
         pauseIndex = 1
         while pauseIndex < len(sequences.pause):
