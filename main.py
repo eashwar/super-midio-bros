@@ -13,10 +13,10 @@ from pygame.locals import *
 from queue import Queue
 import threading
 commandKey = {
-        'right':'right',
-        'left':'left',
-        'jump':'alt',
-        'pause':'esc'
+        'right':'d',
+        'left':'a',
+        'jump':'.',
+        'pause':'enter'
     }
 
 try:  # Ensure set available for output example
@@ -40,7 +40,6 @@ def emu_controller():
     while True:
         if keyPressed: 
             pyautogui.keyDown(commandKey[latestNonWait])
-            print("Pressed " + latestNonWait + " key down!")
 
         if latestCommand == 'end':
             break
@@ -52,7 +51,6 @@ def emu_controller():
                 pyautogui.keyDown(commandKey[lastDirection])
 
             pyautogui.keyDown(commandKey[latestCommand])
-            print("Pressed " + latestCommand + " key down!")
 
             recentTime = time.time()
             keyPressed = True
@@ -75,13 +73,11 @@ def emu_controller():
                         if latestNonWait == 'jump':
                             pyautogui.keyUp(commandKey[lastDirection])
                         pyautogui.keyUp(commandKey[latestNonWait])
-                        print("Lifted " + latestNonWait + " key up!")
             else: 
                 keyPressed = False 
                 if latestNonWait == 'jump':
                         pyautogui.keyUp(commandKey[lastDirection])
                 pyautogui.keyUp(commandKey[latestNonWait])
-                print("Lifted " + latestNonWait + " key up!")
 
 
     
@@ -141,18 +137,15 @@ def draw_sfx_rects():
     pygame.draw.rect(keyboardDisp, green, get_rect(sequences.jump[0]))
     pygame.draw.rect(keyboardDisp, green, get_rect(sequences.jump[1]))
     pygame.draw.rect(keyboardDisp, blue, get_rect(sequences.reverse[0]))
-    rev_2_rect = get_rect(sequences.reverse[1])
-    rev_2_rect.height /= 2
-    pygame.draw.rect(keyboardDisp, blue, rev_2_rect)
-    pause_1_rect = get_rect(sequences.pause[0])
-    pause_1_rect.height /= 2
-    pause_1_rect.top += pause_1_rect.height
-    pygame.draw.rect(keyboardDisp, cyan, pause_1_rect)
+    pygame.draw.rect(keyboardDisp, blue, get_rect(sequences.reverse[1]))
+    pygame.draw.rect(keyboardDisp, cyan, get_rect(sequences.pause[0]))
     pygame.draw.rect(keyboardDisp, cyan, get_rect(sequences.pause[1]))
 
 clock = pygame.time.Clock()
 
 while True:
+    pygame.event.get()
+
     keyboardDisp.blit(keyboardImg, (0, 0))
     draw_sfx_rects()
     pygame.draw.rect(keyboardDisp, red, get_rect(sequences.melody1_1[melodyPosition]))        
