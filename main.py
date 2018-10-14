@@ -94,6 +94,7 @@ disp_height = 200
 keyboardDisp = pygame.display.set_mode((disp_width, disp_height))
 pygame.display.set_caption("Super MIDIo Bros.")
 keyboardImg = pygame.image.load("res/keyboard.png")
+introImg = pygame.image.load("res/introduction.png")
 
 red = (255, 0, 0)
 lightred = (255, 147, 140)
@@ -146,6 +147,15 @@ melodyPosition = 0
 jumpPosition = 0
 betweenJumpCounter = 0
 goingRight = True
+
+keyboardDisp.blit(introImg, (0, 0))
+pygame.display.flip()
+currentNote = inputs.getInput()
+while currentNote == 0:
+    keyboardDisp.blit(introImg, (0, 0))
+    pygame.display.flip()
+    clock.tick(60)
+    currentNote = inputs.getInput()
 
 while True:
     pygame.event.get()
