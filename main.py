@@ -152,6 +152,7 @@ keyboardDisp.blit(introImg, (0, 0))
 pygame.display.flip()
 currentNote = inputs.getInput()
 while currentNote == 0:
+    pygame.event.get()
     keyboardDisp.blit(introImg, (0, 0))
     pygame.display.flip()
     clock.tick(60)
