@@ -67,6 +67,10 @@ def emu_controller():
         if latestCommand != latestNonWait:
             if latestCommand == 'wait':
                 if keyPressed:
+                    if latestNonWait == 'jump':
+                        buffer = 0.4
+                    else:
+                        buffer = 0.2
                     if time.time() - recentTime > buffer:
                         keyPressed = False; 
                         pyautogui.keyUp(commandKey[latestNonWait])
@@ -171,7 +175,7 @@ while True:
 
     if currentNote == sequences.melody1_1[melodyPosition]:
         betweenJumpCounter += 1
-        if betweenJumpCounter > 2 and jumpPosition == 1:
+        if betweenJumpCounter > 4 and jumpPosition == 1:
             jumpPosition = 0
             betweenJumpCounter = 0
         if goingRight:
@@ -189,7 +193,7 @@ while True:
             betweenJumpCounter = 0
     elif currentNote == sequences.reverse[0]:
         betweenJumpCounter += 1
-        if betweenJumpCounter > 2 and jumpPosition == 1:
+        if betweenJumpCounter > 4 and jumpPosition == 1:
             jumpPosition = 0
             betweenJumpCounter = 0
         currentNote = inputs.getInput()
@@ -199,7 +203,7 @@ while True:
             goingRight = not goingRight
     elif currentNote == sequences.pause[0]:
         betweenJumpCounter += 1
-        if betweenJumpCounter > 2 and jumpPosition == 1:
+        if betweenJumpCounter > 4 and jumpPosition == 1:
             jumpPosition = 0
             betweenJumpCounter = 0
         currentNote = 0
