@@ -91,13 +91,14 @@ t.daemon = True
 t.start()
 
 disp_width = 1261
-disp_height = 169
+disp_height = 200
 
 keyboardDisp = pygame.display.set_mode((disp_width, disp_height))
 pygame.display.set_caption("Super MIDIo Bros.")
 keyboardImg = pygame.image.load("res/keyboard.png")
 
 red = (255, 0, 0)
+lightred = (255, 147, 140)
 green = (0, 255, 0)
 blue = (0, 0, 255)
 cyan = (0, 255, 255)
@@ -156,10 +157,8 @@ while True:
     if currentNote == sequences.melody1_1[melodyPosition]:
         if goingRight:
             q.put("right")
-            print("right")
         else:
             q.put("left")
-            print("left")
         melodyPosition += 1
         if melodyPosition == len(sequences.melody1_1):
             melodyPosition = 0
@@ -169,14 +168,12 @@ while True:
             currentNote = inputs.getInput()
         if currentNote == sequences.jump[1]:
             q.put("jump")
-            print("jump!")
     elif currentNote == sequences.reverse[0]:
         currentNote = inputs.getInput()
         while currentNote == 0:
             currentNote = inputs.getInput()
         if currentNote == sequences.reverse[1]:
             goingRight = not goingRight
-            print("reverse!")
     elif currentNote == sequences.pause[0]:
         currentNote = 0
         pauseIndex = 1
@@ -190,10 +187,10 @@ while True:
                 break
         if pauseIndex == len(sequences.pause):
             q.put("pause")
-            print("pause!")
+    elif currentNote == 37:
+        melodyPosition = 0
     elif currentNote == 36:
         q.put("end")
-        print("end")
         break
 q.join()
 sys.exit()
